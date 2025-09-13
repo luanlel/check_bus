@@ -1,23 +1,24 @@
 // backend/src/controllers/adminController.js
-import { db } from "../config/firebase-config.js";
-import { collection, getDocs, doc, deleteDoc } from "firebase/firestore";
+import { db } from "../config/firebase-admin.js";
 
-// Lista todos os alunos cadastrados
 export async function listarAlunos(req, res) {
   try {
-    const alunosSnap = await getDocs(collection(db, "alunos"));
+    const alunosSnap = await db.collection("alunos").get();
 
-    if (alunosSnap.empty) {
-      return res.json([]);
-    }
+    if (alunosSnap.empty) return res.json([]);
 
     const lista = [];
+
     for (const alunoDoc of alunosSnap.docs) {
       const aluno = alunoDoc.data();
       const alunoId = alunoDoc.id;
 
-      // Buscar horários do aluno na coleção separada 'horarios'
-      const horariosSnap = await getDocs(collection(db, "horarios", alunoId, "listaHorarios"));
+      const horariosSnap = await db
+        .collection("horarios")
+        .doc(alunoId)
+        .collection("listaHorarios")
+        .get();
+
       const horarios = horariosSnap.docs.map(h => {
         const d = h.data();
         return `${d.titulo || ""} ${d.horario || ""}`.trim();
@@ -40,19 +41,21 @@ export async function listarAlunos(req, res) {
   }
 }
 
-// Excluir aluno + horários
 export async function excluirAluno(req, res) {
   const { id } = req.params;
   try {
-    // Apaga horários do aluno na coleção separada 'horarios'
-    const horariosSnap = await getDocs(collection(db, "horarios", id, "listaHorarios"));
-    const promises = horariosSnap.docs.map(hDoc =>
-      deleteDoc(doc(db, "horarios", id, "listaHorarios", hDoc.id))
-    );
-    await Promise.all(promises);
+    const horariosSnap = await db
+      .collection("horarios")
+      .doc(id)
+      .collection("listaHorarios")
+      .get();
 
-    // Apaga aluno
-    await deleteDoc(doc(db, "alunos", id));
+    // usa batch para deletar eficientemente
+    const batch = db.batch();
+    horariosSnap.docs.forEach(d => batch.delete(d.ref));
+    await batch.commit();
+
+    await db.collection("alunos").doc(id).delete();
 
     res.json({ message: "Aluno excluído com sucesso" });
   } catch (err) {

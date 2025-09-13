@@ -71,3 +71,10 @@ h1 {
 .admin-only {
   display: none;
 }
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, auto));
+  gap: 20px;
+  justify-content: center; /* centraliza os itens */
+}

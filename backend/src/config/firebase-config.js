@@ -1,11 +1,9 @@
-// backend/src/config/firebase-config.js
-// Exporta a configuração e inicialização do Firebase para uso no backend (Node.js)
-
+// Importa módulos do Firebase para front-end ou back-end limitado
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
-// Configuração do Firebase (mesma que você já tem no front)
+// Configuração do Firebase (igual à do console Firebase)
 const firebaseConfig = {
   apiKey: "AIzaSyDAG_nfsNFNk6ZnhTnC9Cci-N6L3Bui4PY",
   authDomain: "trancaeletronica-90835.firebaseapp.com",

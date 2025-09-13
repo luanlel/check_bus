@@ -1,25 +1,19 @@
 // backend/src/controllers/relatorioController.js
-import { db } from "../config/firebase-config.js";
-import { collection, getDocs, doc, deleteDoc, query, orderBy } from "firebase/firestore";
+import { db } from "../config/firebase-admin.js";
 
-// Lista todos os registros de acesso
 export async function listarRelatorios(req, res) {
   try {
-    const registrosRef = collection(db, "acessos");
-    const q = query(registrosRef, orderBy("data", "desc")); // ordena por data
+    const registrosRef = db.collection("acessos");
+    const snapshot = await registrosRef.orderBy("data", "desc").get();
 
-    const snapshot = await getDocs(q);
-
-    if (snapshot.empty) {
-      return res.json([]);
-    }
+    if (snapshot.empty) return res.json([]);
 
     const lista = snapshot.docs.map(docSnap => {
       const dados = docSnap.data();
       return {
         id: docSnap.id,
         uid: dados.uid || "UID Desconhecido",
-        idCartao: docSnap.id, // <-- agora pega o ID do documento (o cartão)
+        idCartao: docSnap.id,          // <-- corrigido
         data: dados.data || "Data Desconhecida",
         horario: dados.horario || "Hora Desconhecida"
       };
@@ -32,11 +26,10 @@ export async function listarRelatorios(req, res) {
   }
 }
 
-// Exclui registro pelo ID
 export async function excluirRelatorio(req, res) {
   const { id } = req.params;
   try {
-    await deleteDoc(doc(db, "acessos", id));
+    await db.collection("acessos").doc(id).delete();
     res.json({ message: "Registro excluído com sucesso" });
   } catch (err) {
     console.error("Erro ao excluir relatório:", err);

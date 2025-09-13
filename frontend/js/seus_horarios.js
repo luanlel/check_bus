@@ -2,11 +2,7 @@ import { db, auth } from "./firebase-config.js";
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 import { collection, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
-const STAFF_EMAIL = "staff@adm.com";
 let userId = null;
-
-const grid = document.getElementById("menuGrid");
-grid.style.visibility = "hidden"; // Esconde grid enquanto carrega
 
 onAuthStateChanged(auth, async (user) => {
   if (!user) {
@@ -15,50 +11,6 @@ onAuthStateChanged(auth, async (user) => {
   }
 
   userId = user.uid;
-
-  // Botões padrão visíveis para todos
-  const defaultButtons = [
-    { icon: 'fa-clock', text: 'Horários', href: 'horarios.html' },
-    { icon: 'fa-location-dot', text: 'GPS', href: 'gps.html' },
-    { icon: 'fa-calendar-days', text: 'Seus Horários', href: 'seus_horarios.html' } // Novo botão
-  ];
-
-  grid.innerHTML = ""; // Limpa o grid
-
-  defaultButtons.forEach(btn => {
-    const div = document.createElement("div");
-    div.className = "card";
-    div.addEventListener("click", () => location.href = btn.href);
-    div.innerHTML = `<i class="fa-solid ${btn.icon} fa-2x"></i><span>${btn.text}</span>`;
-    grid.appendChild(div);
-  });
-
-  // Botões admin, se for staff
-  if (user.email?.toLowerCase() === STAFF_EMAIL.toLowerCase()) {
-    const adminButtons = [
-      { icon: 'fa-book-open', text: 'Relatórios', href: 'relatorios.html' },
-      { icon: 'fa-users', text: 'Lista de Alunos', href: 'admin.html' }
-    ];
-
-    adminButtons.forEach(btn => {
-      const div = document.createElement("div");
-      div.className = "card";
-      div.addEventListener("click", () => location.href = btn.href);
-      div.innerHTML = `<i class="fa-solid ${btn.icon} fa-2x"></i><span>${btn.text}</span>`;
-      grid.appendChild(div);
-    });
-  }
-
-  // Botão logout
-  const logoutBtn = document.createElement("div");
-  logoutBtn.className = "card logout";
-  logoutBtn.addEventListener("click", logout);
-  logoutBtn.innerHTML = `<i class="fa-solid fa-right-from-bracket fa-2x"></i><span>Sair</span>`;
-  grid.appendChild(logoutBtn);
-
-  // Grid só aparece depois de montar tudo
-  grid.style.visibility = "visible";
-
   carregarHorarios();
 });
 
@@ -67,6 +19,7 @@ async function carregarHorarios() {
   if (!userId) return;
 
   try {
+    // Coleção correta: horarios/{userId}/listaHorarios
     const horariosRef = collection(db, "horarios", userId, "listaHorarios");
     const horariosSnap = await getDocs(horariosRef);
     const horariosLista = document.getElementById("horariosLista");
@@ -115,7 +68,7 @@ window.logout = () => {
   signOut(auth).then(() => window.location.href = "index.html");
 };
 
-// Toggle menu lateral (se houver)
+// Toggle menu lateral
 window.toggleMenu = () => {
   const sidebar = document.getElementById("sidebar");
   const overlay = document.getElementById("overlay");
