@@ -1,8 +1,11 @@
+// seus_horarios.js
 import { db, auth } from "./firebase-config.js";
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 import { collection, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
 let userId = null;
+const sidebar = document.getElementById("sidebar");
+const overlay = document.getElementById("overlay");
 
 onAuthStateChanged(auth, async (user) => {
   if (!user) {
@@ -11,15 +14,49 @@ onAuthStateChanged(auth, async (user) => {
   }
 
   userId = user.uid;
+
+  // Tipo de usuário do login
+  const tipoUsuario = localStorage.getItem("tipoUsuario") || "aluno";
+
+  gerarMenuLateral(tipoUsuario);
+
   carregarHorarios();
 });
 
-// Carrega horários do usuário
+// Gera os botões do menu lateral dinamicamente
+function gerarMenuLateral(tipoUsuario) {
+  sidebar.innerHTML = ""; // Limpa menu
+
+  const menuButtons = [
+    { text: "Principal", href: "home_principal.html", tipo: "todos" },
+    { text: "Editar Horários", href: "horarios.html", tipo: "todos" },
+    { text: "Abrir GPS", href: "gps.html", tipo: "todos" },
+    { text: "Relatório", href: "relatorios.html", tipo: "admin" },
+    { text: "Lista de Alunos", href: "admin.html", tipo: "admin" },
+  ];
+
+  menuButtons.forEach(btn => {
+    if (btn.tipo === "todos" || btn.tipo === tipoUsuario) {
+      const button = document.createElement("button");
+      button.textContent = btn.text;
+      button.addEventListener("click", () => location.href = btn.href);
+      sidebar.appendChild(button);
+    }
+  });
+
+  // Botão logout
+  const logoutBtn = document.createElement("button");
+  logoutBtn.textContent = "Sair";
+  logoutBtn.className = "logout";
+  logoutBtn.addEventListener("click", logout);
+  sidebar.appendChild(logoutBtn);
+}
+
+// Carrega horários
 async function carregarHorarios() {
   if (!userId) return;
 
   try {
-    // Coleção correta: horarios/{userId}/listaHorarios
     const horariosRef = collection(db, "horarios", userId, "listaHorarios");
     const horariosSnap = await getDocs(horariosRef);
     const horariosLista = document.getElementById("horariosLista");
@@ -70,11 +107,6 @@ window.logout = () => {
 
 // Toggle menu lateral
 window.toggleMenu = () => {
-  const sidebar = document.getElementById("sidebar");
-  const overlay = document.getElementById("overlay");
-  const menuBtn = document.querySelector(".menu-btn");
-
   sidebar.classList.toggle("active");
   overlay.classList.toggle("active");
-  if (menuBtn) menuBtn.classList.toggle("hidden");
 };

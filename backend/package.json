@@ -1,7 +1,8 @@
 {
   "name": "check_bus",
   "version": "1.0.0",
-  "description": "Check Bus é um sistema inteligente de transporte universitário voltado para o monitoramento seguro e eficiente dos ônibus que atendem estudantes. A aplicação conecta alunos, gestores educacionais e operadores do transporte, permitindo que o fluxo de embarque, ocupação dos ônibus e horários sejam controlados em tempo real com tecnologia de IoT.",
+  "type": "module",
+  "description": "Check Bus é um sistema inteligente de transporte universitário voltado para o monitoramento seguro e eficiente dos ônibus que atendem estudantes.",
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",
@@ -14,11 +15,12 @@
   "dependencies": {
     "body-parser": "^2.2.0",
     "cors": "^2.8.5",
+    "dotenv": "^17.2.2",
     "express": "^5.1.0",
     "firebase": "^12.2.1",
     "firebase-admin": "^13.5.0"
   },
   "devDependencies": {
-    "nodemon": "^3.1.0"
+    "nodemon": "^3.1.10"
   }
 }

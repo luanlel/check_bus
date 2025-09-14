@@ -1,10 +1,9 @@
+// frontend/js/home.js
 import { db, auth } from "./firebase-config.js";
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 import { collection, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
-const STAFF_EMAIL = "staff@adm.com";
 let userId = null;
-
 const grid = document.getElementById("menuGrid");
 grid.style.visibility = "hidden"; // Esconde grid enquanto carrega
 
@@ -16,38 +15,35 @@ onAuthStateChanged(auth, async (user) => {
 
   userId = user.uid;
 
-  // Botões padrão visíveis para todos
-  const defaultButtons = [
-    { icon: 'fa-clock', text: 'Horários', href: 'horarios.html' },
-    { icon: 'fa-location-dot', text: 'GPS', href: 'gps.html' },
-    { icon: 'fa-calendar-days', text: 'Seus Horários', href: 'seus_horarios.html' } // Novo botão
-  ];
+  // Pega tipoUsuario do login (aluno ou admin)
+  const tipoUsuario = localStorage.getItem("tipoUsuario") || "aluno";
 
   grid.innerHTML = ""; // Limpa o grid
 
-  defaultButtons.forEach(btn => {
-    const div = document.createElement("div");
-    div.className = "card";
-    div.addEventListener("click", () => location.href = btn.href);
-    div.innerHTML = `<i class="fa-solid ${btn.icon} fa-2x"></i><span>${btn.text}</span>`;
-    grid.appendChild(div);
-  });
+  // Botões padrão para todos
+  const defaultButtons = [
+    { icon: 'fa-clock', text: 'Horários', href: 'horarios.html', tipo: 'todos' },
+    { icon: 'fa-location-dot', text: 'GPS', href: 'gps.html', tipo: 'todos' },
+    { icon: 'fa-calendar-days', text: 'Seus Horários', href: 'seus_horarios.html', tipo: 'aluno' }
+  ];
 
-  // Botões admin, se for staff
-  if (user.email?.toLowerCase() === STAFF_EMAIL.toLowerCase()) {
-    const adminButtons = [
-      { icon: 'fa-book-open', text: 'Relatórios', href: 'relatorios.html' },
-      { icon: 'fa-users', text: 'Lista de Alunos', href: 'admin.html' }
-    ];
+  // Botões admin
+  const adminButtons = [
+    { icon: 'fa-book-open', text: 'Relatórios', href: 'relatorios.html', tipo: 'admin' },
+    { icon: 'fa-users', text: 'Lista de Alunos', href: 'admin.html', tipo: 'admin' }
+  ];
 
-    adminButtons.forEach(btn => {
+  const allButtons = [...defaultButtons, ...adminButtons];
+
+  allButtons.forEach(btn => {
+    if (btn.tipo === 'todos' || btn.tipo === tipoUsuario) {
       const div = document.createElement("div");
       div.className = "card";
       div.addEventListener("click", () => location.href = btn.href);
       div.innerHTML = `<i class="fa-solid ${btn.icon} fa-2x"></i><span>${btn.text}</span>`;
       grid.appendChild(div);
-    });
-  }
+    }
+  });
 
   // Botão logout
   const logoutBtn = document.createElement("div");
@@ -56,7 +52,6 @@ onAuthStateChanged(auth, async (user) => {
   logoutBtn.innerHTML = `<i class="fa-solid fa-right-from-bracket fa-2x"></i><span>Sair</span>`;
   grid.appendChild(logoutBtn);
 
-  // Grid só aparece depois de montar tudo
   grid.style.visibility = "visible";
 
   carregarHorarios();
@@ -113,15 +108,4 @@ window.excluirHorario = async (docId) => {
 // Logout
 window.logout = () => {
   signOut(auth).then(() => window.location.href = "index.html");
-};
-
-// Toggle menu lateral (se houver)
-window.toggleMenu = () => {
-  const sidebar = document.getElementById("sidebar");
-  const overlay = document.getElementById("overlay");
-  const menuBtn = document.querySelector(".menu-btn");
-
-  sidebar.classList.toggle("active");
-  overlay.classList.toggle("active");
-  if (menuBtn) menuBtn.classList.toggle("hidden");
 };

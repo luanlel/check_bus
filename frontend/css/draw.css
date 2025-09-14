@@ -76,3 +76,29 @@
 .hidden {
   display: none !important;
 }
+
+/* Sidebar (draw) */
+.sidebar {
+  position: fixed;       /* fixa na tela */
+  left: -250px;          /* fora da tela inicialmente */
+  top: 0;
+  width: 250px;
+  height: 100%;
+  color: white;
+  transition: left 0.3s ease;
+  z-index: 1000;         /* deve ser maior que o botão */
+}
+
+/* Quando ativa */
+.sidebar.active {
+  left: 0;               /* entra na tela */
+}
+
+/* Botão do menu */
+.menu-btn {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 900;          /* menor que a sidebar */
+}
+

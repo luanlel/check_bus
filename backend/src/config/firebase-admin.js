@@ -1,16 +1,12 @@
 import admin from "firebase-admin";
-import { readFileSync } from "fs";
+import fs from "fs";
 import path from "path";
-import { fileURLToPath } from "url";
 
-// Ajustes para usar __dirname no ES Modules
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// Caminho correto (mesmo nível do script)
+const serviceAccountPath = path.resolve("serviceAccountKey.json");
 
-// Caminho da chave privada (JSON que você baixou do Firebase)
-const serviceAccount = JSON.parse(
-  readFileSync(path.join(__dirname, "../../serviceAccountKey.json"), "utf8")
-);
+// Lê o arquivo e converte para objeto
+const serviceAccount = JSON.parse(fs.readFileSync(serviceAccountPath, "utf8"));
 
 // Inicializa Firebase Admin apenas se não estiver inicializado
 if (!admin.apps.length) {
